@@ -1,0 +1,23 @@
+# Environment & Secret files
+.env
+*.env
+server/.env
+
+# Node modules
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# File uploads & temporary files
+server/uploads/
+*.log
+
+# Build output
+client/dist/
+client/dist-ssr/
+
+# IDE & OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

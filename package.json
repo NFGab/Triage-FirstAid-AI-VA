@@ -1,0 +1,15 @@
+{
+  "name": "voice-agent-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Proof-of-Concept Web AI Voice Assistant using Groq Whisper, Llama 3.1, Edge-TTS, Vite & React",
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "start:server": "cd server && npm start",
+    "start:client": "cd client && npm run dev",
+    "build": "cd client && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
