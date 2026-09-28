@@ -6,7 +6,7 @@ export function useVoiceAssistant() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hello! I am Aura, your virtual triage nurse and first-aid assistant. Please remember I am an AI, not a doctor. How can I help you with first aid or medical guidance today?",
+      content: "Hello! Welcome to LifeAid, your virtual triage nurse and first-aid assistant. Please remember I am an AI, not a doctor. How can I help you with first aid or medical guidance today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);

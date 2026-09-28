@@ -4,7 +4,6 @@ import * as THREE from 'three';
 export default function SphereVisualizer({ audioLevel = 0, status = 'idle' }) {
   const containerRef = useRef(null);
   
-  // Use refs to store latest audioLevel & status without triggering useEffect re-mounts
   const audioLevelRef = useRef(audioLevel);
   const statusRef = useRef(status);
 
@@ -19,16 +18,15 @@ export default function SphereVisualizer({ audioLevel = 0, status = 'idle' }) {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Ensure container is clean (prevents duplicate canvases)
     containerRef.current.innerHTML = '';
 
-    const width = containerRef.current.clientWidth || 340;
-    const height = containerRef.current.clientHeight || 340;
+    const width = containerRef.current.clientWidth || 320;
+    const height = containerRef.current.clientHeight || 320;
 
-    // 1. Scene & Camera setup
+    // 1. Scene & Camera
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.z = 4.5;
+    camera.position.z = 4.2;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
@@ -36,20 +34,19 @@ export default function SphereVisualizer({ audioLevel = 0, status = 'idle' }) {
     containerRef.current.appendChild(renderer.domElement);
 
     // 2. Geometry
-    const geometry = new THREE.IcosahedronGeometry(1.4, 64);
+    const geometry = new THREE.IcosahedronGeometry(1.35, 64);
     const pos = geometry.attributes.position;
     const initialPositions = pos.clone();
 
-    // 3. Materials
+    // 3. Materials using Palette: #046241 Castleton Green, #FFB347 Saffron, #FFC370 Earth Yellow, #133020 Dark Serpent
     const material = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#3b82f6'),
-      roughness: 0.15,
-      metalness: 0.8,
+      color: new THREE.Color('#046241'),
+      roughness: 0.2,
+      metalness: 0.7,
       clearcoat: 1.0,
       clearcoatRoughness: 0.1,
-      wireframe: false,
-      transmission: 0.2,
-      ior: 1.5,
+      transmission: 0.15,
+      ior: 1.45,
     });
 
     const sphere = new THREE.Mesh(geometry, material);
@@ -57,34 +54,34 @@ export default function SphereVisualizer({ audioLevel = 0, status = 'idle' }) {
 
     // Outer wireframe shell
     const wireframeMat = new THREE.MeshBasicMaterial({
-      color: new THREE.Color('#60a5fa'),
+      color: new THREE.Color('#FFB347'),
       wireframe: true,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.2,
     });
     const wireframeMesh = new THREE.Mesh(geometry, wireframeMat);
-    wireframeMesh.scale.set(1.05, 1.05, 1.05);
+    wireframeMesh.scale.set(1.04, 1.04, 1.04);
     scene.add(wireframeMesh);
 
     // 4. Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
-    const pointLight1 = new THREE.PointLight(0x00f3ff, 2.5, 50);
+    const pointLight1 = new THREE.PointLight(0x046241, 3, 50);
     pointLight1.position.set(5, 5, 5);
     scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0xa855f7, 2, 50);
+    const pointLight2 = new THREE.PointLight(0xFFB347, 2.5, 50);
     pointLight2.position.set(-5, -5, -5);
     scene.add(pointLight2);
 
-    // Color helper
+    // Color helper mapping for status
     const getTargetColor = (currStatus) => {
       switch (currStatus) {
-        case 'listening': return new THREE.Color('#00f3ff'); // Neon cyan
-        case 'thinking': return new THREE.Color('#a855f7');  // Purple pulse
-        case 'speaking': return new THREE.Color('#10b981');  // Energetic green
-        default: return new THREE.Color('#3b82f6');          // Cobalt blue
+        case 'listening': return new THREE.Color('#FFC370'); // Earth Yellow glow
+        case 'thinking': return new THREE.Color('#FFB347');  // Saffron pulse
+        case 'speaking': return new THREE.Color('#046241');  // Castleton Green
+        default: return new THREE.Color('#133020');          // Dark Serpent
       }
     };
 
@@ -99,36 +96,31 @@ export default function SphereVisualizer({ audioLevel = 0, status = 'idle' }) {
       const currentStatus = statusRef.current;
       const targetAudioLevel = audioLevelRef.current;
 
-      // Color interpolation
       const targetColor = getTargetColor(currentStatus);
       material.color.lerp(targetColor, 0.05);
       wireframeMat.color.lerp(targetColor, 0.05);
       pointLight1.color.lerp(targetColor, 0.05);
 
-      // Audio level smoothing
       currentLevel += (targetAudioLevel - currentLevel) * 0.15;
 
-      // Rotation
-      sphere.rotation.y = elapsedTime * 0.3;
-      sphere.rotation.x = elapsedTime * 0.15;
-      wireframeMesh.rotation.y = -elapsedTime * 0.2;
+      sphere.rotation.y = elapsedTime * 0.25;
+      sphere.rotation.x = elapsedTime * 0.12;
+      wireframeMesh.rotation.y = -elapsedTime * 0.18;
 
-      // Pulse
       const basePulse = currentStatus === 'thinking' 
-        ? Math.sin(elapsedTime * 6) * 0.1 
+        ? Math.sin(elapsedTime * 6) * 0.08 
         : Math.sin(elapsedTime * 2) * 0.03;
 
-      const scale = 1 + basePulse + (currentLevel * 0.6);
+      const scale = 1 + basePulse + (currentLevel * 0.55);
       sphere.scale.set(scale, scale, scale);
-      wireframeMesh.scale.set(scale * 1.05, scale * 1.05, scale * 1.05);
+      wireframeMesh.scale.set(scale * 1.04, scale * 1.04, scale * 1.04);
 
-      // Vertex deformation
       const positions = geometry.attributes.position;
       const initialPos = initialPositions.array;
       const posArray = positions.array;
 
-      const freq = currentStatus === 'speaking' ? 4.0 : 2.5;
-      const amp = 0.05 + currentLevel * 0.35;
+      const freq = currentStatus === 'speaking' ? 3.8 : 2.2;
+      const amp = 0.04 + currentLevel * 0.32;
 
       for (let i = 0; i < posArray.length; i += 3) {
         const vx = initialPos[i];
@@ -175,10 +167,10 @@ export default function SphereVisualizer({ audioLevel = 0, status = 'idle' }) {
       wireframeMat.dispose();
       renderer.dispose();
     };
-  }, []); // Run ONCE on mount
+  }, []);
 
   return (
-    <div className="relative w-full h-full min-h-[320px] flex items-center justify-center">
+    <div className="relative w-full h-full min-h-[260px] flex items-center justify-center">
       <div ref={containerRef} className="w-full h-full absolute inset-0 cursor-pointer" />
     </div>
   );
