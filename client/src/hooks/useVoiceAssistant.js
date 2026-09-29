@@ -6,7 +6,7 @@ export function useVoiceAssistant() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hello! Welcome to LifeAid, your virtual triage nurse and first-aid assistant. Please remember I am an AI, not a doctor. How can I help you with first aid or medical guidance today?",
+      content: "Hey there! Welcome to FitBuddy, your virtual fitness coach and workout assistant! Just a heads up, I'm an AI, not a certified personal trainer. Whether you want exercises for a specific muscle group, workout plans, or creative workouts with whatever equipment you have, I'm here to help. Let's get moving!",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
